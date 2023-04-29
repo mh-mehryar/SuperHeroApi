@@ -4,50 +4,39 @@ namespace SuperHeroAPI.Services.SuperHeroService
 {
     public class SuperHeroService : ISuperHeroService
     {
-        private static List<SuperHero> superHeroes = new List<SuperHero>
-        {
-            new SuperHero
-            {
-                Id =1,
-                Name = "Spider Man",
-                FirstName = "Mohammad Hossein",
-                LastName = "Mehryar",
-                Place = "New York City"
+       
+        private readonly DataContext _context;
 
-            },
-            new SuperHero
-            {
-                Id = 2 ,
-                Name = "Wonder Woman",
-                FirstName = "Farkhondeh",
-                LastName = "Namazi",
-                Place = "New York City"
-            }
-
-         };
-        public List<SuperHero> AddHero(SuperHero hero)
+        public SuperHeroService(DataContext context)
         {
-            superHeroes.Add(hero);
-            return superHeroes;
+            _context = context;
+        }
+        public async Task<List<SuperHero>> GetAllHeroes()
+        {
+            var heroes = await _context.SuperHeroes.ToListAsync();
+            return heroes;
         }
 
-
-        public List<SuperHero> GetAllHeroes()
+        public async Task<SuperHero?> GetSingleHero(int id)
         {
-            return superHeroes;
-        }
-
-        public SuperHero? GetSingleHero(int id)
-        {
-            var hero = superHeroes.Find(x => x.Id == id);
+            var hero = await _context.SuperHeroes.FindAsync(id);
             if (hero is null)
                 return null;
             return hero;
         }
 
-        public List<SuperHero>? UpdateHero(int id, SuperHero request)
+        public async Task<List<SuperHero>> AddHero(SuperHero hero)
         {
-            var hero = superHeroes.Find(x => x.Id == id);
+            _context.SuperHeroes.Add(hero);
+            await _context.SaveChangesAsync();
+            return await _context.SuperHeroes.ToListAsync();
+        }
+
+
+
+        public async Task<List<SuperHero>?> UpdateHero(int id, SuperHero request)
+        {
+            var hero = await _context.SuperHeroes.FindAsync(id);
             if (hero is null)
                 return null;
 
@@ -56,16 +45,18 @@ namespace SuperHeroAPI.Services.SuperHeroService
             hero.LastName = request.LastName;
             hero.Place = request.Place;
 
-            return superHeroes;
+            await _context.SaveChangesAsync();
+            return await _context.SuperHeroes.ToListAsync();
         }
-        public List<SuperHero>? DeleteHero(int id)
+        public async Task<List<SuperHero>?> DeleteHero(int id)
         {
-            var hero = superHeroes.Find(x => x.Id == id);
+            var hero = await _context.SuperHeroes.FindAsync(id);
             if (hero is null)
                 return null;
 
-            superHeroes.Remove(hero);
-            return superHeroes;
+           _context.SuperHeroes.Remove(hero);
+            await _context.SaveChangesAsync();
+            return await _context.SuperHeroes.ToListAsync();
         }
 
 
